@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>Időjárás HU/EN + konstans piaci árfolyamok</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --ticker-total: 190px;
+      --bg: #000;
+      --muted: rgba(242,242,242,.55);
+      --stroke: rgba(215,184,90,.22);
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+  /* Fullscreen background video */
+    .bg{
+      position:fixed; inset:0;
+      overflow:hidden;
+      background:#05070d;
+    }
+    .bg video{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      opacity:.92;          /* a képen látható “luxy” háttérhez */
+      filter: contrast(1.05) saturate(1.05);
+    }
+    .bg::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(1200px 700px at 40% 35%, rgba(0,0,0,.25), rgba(0,0,0,.55) 60%, rgba(0,0,0,.72) 100%),
+        linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.55));
+      pointer-events:none;
+    }
+
+
+
+    /* Felső rész: a váltakozó oldalak helye */
+    #viewport {
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%;
+      height: calc(100vh - var(--ticker-total));
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    iframe.page {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      background: var(--bg);
+    }
+    iframe.page.active { display: block; }
+
+    /* Alsó konstans ticker */
+    #ticker {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: var(--ticker-total);
+      background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.35));
+      border-top: 1px solid var(--stroke);
+      overflow: hidden;
+    }
+
+    #tickerLabel{
+      position:absolute;
+      left:26px;
+      top:10px;
+      font-size:36px; /* ~2.5–3x */
+      letter-spacing:.6px;
+      color:var(--muted);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    #tvWrap{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height:72px;
+      transform: scale(2.6);
+      transform-origin: left bottom;
+    }
+    #tvWrap iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+ <div class="bg" aria-hidden="true">
+    <video autoplay muted loop playsinline>
+      <source src="abstract_loop.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div id="viewport">
+    <iframe id="hu" class="page active" src="magyar_02.html" title="Magyar"></iframe>
+    <iframe id="en" class="page" src="angol_02.html" title="English"></iframe>
+  </div>
+
+  <div id="ticker" aria-label=" ">
+   
+    <div id="tvWrap">
+      <iframe
+        scrolling="no"
+        allowtransparency="true"
+        frameborder="0"
+        src="https://www.tradingview-widget.com/embed-widget/ticker-tape/?locale=hu#%7B%22symbols%22%3A%5B%7B%22proName%22%3A%22FOREXCOM%3AEURHUF%22%2C%22title%22%3A%22EUR%2FHUF%22%7D%2C%7B%22proName%22%3A%22FOREXCOM%3AUSDHUF%22%2C%22title%22%3A%22USD%2FHUF%22%7D%2C%7B%22proName%22%3A%22FOREXCOM%3ACHFHUF%22%2C%22title%22%3A%22CHF%2FHUF%22%7D%2C%7B%22proName%22%3A%22FX_IDC%3APLNHUF%22%2C%22title%22%3A%22PLN%2FHUF%22%7D%2C%7B%22proName%22%3A%22FX_IDC%3AJPYHUF%22%2C%22title%22%3A%22JPY%2FHUF%22%7D%2C%7B%22proName%22%3A%22BET%3AOTP%22%2C%22title%22%3A%22OTP%22%7D%2C%7B%22proName%22%3A%22BET%3AMOL%22%2C%22title%22%3A%22MOL%22%7D%2C%7B%22proName%22%3A%22BET%3ARICHTER%22%2C%22title%22%3A%22RICHTER%22%7D%2C%7B%22proName%22%3A%22BINANCE%3ABTCUSDT%22%2C%22title%22%3A%22BTC%22%7D%5D%2C%22showSymbolLogo%22%3Atrue%2C%22isTransparent%22%3Atrue%2C%22displayMode%22%3A%22adaptive%22%2C%22colorTheme%22%3A%22dark%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A44%2C%22utm_source%22%3A%22%22%2C%22utm_medium%22%3A%22widget%22%2C%22utm_campaign%22%3A%22ticker-tape%22%2C%22page-uri%22%3A%22__NHTTP__%22%7D"
+        title="TradingView ticker tape"
+      ></iframe>
+    </div>
+  </div>
+
+  <script>
+    const hu = document.getElementById("hu");
+    const en = document.getElementById("en");
+    let showHu = true;
+
+    setInterval(() => {
+      showHu = !showHu;
+      hu.classList.toggle("active", showHu);
+      en.classList.toggle("active", !showHu);
+    }, 10000);
+  </script>
+
+</body>
+</html>

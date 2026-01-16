@@ -1,0 +1,659 @@
+<html lang="hu"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="refresh" content="1800"> <!-- biztonsági reload 30 percenként -->
+  <title>Debrecen időjárás + Tőzsde – 4K</title>
+
+  <style>
+    :root{
+      --bg: #05060a;
+      --panel: rgba(255,255,255,.055);
+      --panel2: rgba(255,255,255,.035);
+      --gold: #d7b85a;
+      --gold2:#f3e1a3;
+      --text: #f2f2f2;
+      --muted: rgba(242,242,242,.78);
+      --muted2: rgba(242,242,242,.62);
+      --stroke: rgba(215,184,90,.28);
+      --shadow: rgba(0,0,0,.55);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
+
+    /* 4K (3840×2160) output – keep the original 1920×1080 design and scale it */
+    .stage{
+      width:100vw;height:100vh;
+      margin:0 auto;
+      position:relative;
+      overflow:hidden;
+      background:
+        radial-gradient(900px 520px at 18% 20%, rgba(215,184,90,.14), transparent 60%),
+        radial-gradient(900px 520px at 82% 78%, rgba(215,184,90,.10), transparent 62%),
+        radial-gradient(1200px 800px at 50% 50%, rgba(255,255,255,.04), transparent 60%),
+        linear-gradient(180deg, #04050a 0%, #05060a 40%, #02030a 100%);
+    }
+
+    /* fixed design surface (1920×1080) */
+    .surface{
+      width:1920px;
+      height:1080px;
+      position:absolute;
+      left:0; top:0;
+      transform-origin: 0 0;
+      will-change: transform;
+    }
+
+    
+    /* soft moving shimmer */
+    .shimmer{
+      position:absolute;inset:-30%;
+      background: conic-gradient(from 180deg, transparent, rgba(215,184,90,.12), transparent, rgba(255,255,255,.06), transparent);
+      filter: blur(40px);
+      opacity:.55;
+      animation: spin 22s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* subtle dust particles */
+    .dust{
+      position:absolute; inset:0;
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.06) 0 2px, transparent 3px),
+        radial-gradient(circle at 70% 60%, rgba(215,184,90,.08) 0 2px, transparent 3px),
+        radial-gradient(circle at 40% 80%, rgba(255,255,255,.05) 0 1px, transparent 2px),
+        radial-gradient(circle at 85% 25%, rgba(215,184,90,.06) 0 1px, transparent 2px);
+      opacity:.45;
+      animation: drift 14s ease-in-out infinite alternate;
+      pointer-events:none;
+    }
+    @keyframes drift{
+      from{transform:translate3d(-10px,-6px,0)}
+      to{transform:translate3d(12px,8px,0)}
+    }
+
+    /* Layout: main content + bottom ticker bar */
+    .wrap{
+      position:relative;
+      height:100%;
+      padding:60px 80px 0 80px;
+      display:grid;
+      grid-template-rows: auto 1fr auto; /* top / main / ticker */
+      gap:26px;
+    }
+
+    /* top bar */
+    .top{
+      display:flex; align-items:flex-end; justify-content:space-between;
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .brand .city{
+      font-size:80px; font-weight:800; letter-spacing:.8px;
+      text-shadow: 0 10px 30px var(--shadow);
+    }
+    .brand .sub{
+      display:flex; gap:18px; align-items:center;
+      font-size:25px; color:var(--muted);
+    }
+    .pill{
+      display:inline-flex; gap:10px; align-items:center;
+      padding:10px 16px;
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(215,184,90,.10), rgba(255,255,255,.03));
+      box-shadow: 0 14px 36px rgba(0,0,0,.35);
+    }
+    .pill b{color:var(--gold2); font-weight:700}
+
+    .clock{
+      text-align:right;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .clock .time{
+      font-size:52px; font-weight:850; letter-spacing:1px;
+      color:var(--gold2);
+      text-shadow: 0 10px 28px rgba(215,184,90,.25);
+    }
+    .clock .date{
+      font-size:40px; color:var(--muted);
+    }
+
+    /* main grid */
+    .main{
+      display:grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap:28px;
+      min-height:0;
+      padding-bottom:18px;
+    }
+
+    .panel{
+      border:1px solid rgba(215,184,90,.18);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border-radius:34px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.45);
+      position:relative;
+      overflow:hidden;
+    }
+    .panel::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(900px 320px at 20% 0%, rgba(215,184,90,.16), transparent 55%);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    /* left: current */
+    .current{
+      padding:40px 44px;
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      gap:18px;
+    }
+    .headline{
+      display:flex; align-items:center; justify-content:space-between;
+      position:relative; z-index:1;
+    }
+    .headline .h{
+      font-size:35px;
+      color:var(--muted);
+      letter-spacing:.4px;
+    }
+    .headline .tag{
+      font-size:20px; color:rgba(242,242,242,.72);
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+      align-items:center;
+      position:relative; z-index:1;
+    }
+
+    .temp{
+      font-size:220px;
+      line-height:1;
+      font-weight:900;
+      letter-spacing:-3px;
+      text-shadow: 0 24px 60px rgba(0,0,0,.55);
+    }
+    .desc{
+      font-size:34px;
+      color:var(--gold2);
+      font-weight:750;
+      margin-top:10px;
+      text-shadow: 0 18px 40px rgba(215,184,90,.20);
+    }
+    .feels{
+      font-size:24px;
+      color:var(--muted);
+      margin-top:14px;
+    }
+
+    .iconBox{
+      justify-self:end;
+      width:300px; height:300px;
+      border-radius:30px;
+      border:1px solid rgba(215,184,90,.18);
+      background: radial-gradient(220px 220px at 30% 20%, rgba(215,184,90,.20), transparent 60%),
+                  rgba(0,0,0,.18);
+      display:flex; align-items:center; justify-content:center;
+      position:relative;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 24px 60px rgba(0,0,0,.42);
+    }
+    .iconBox svg{width:200px;height:200px;filter: drop-shadow(0 18px 28px rgba(0,0,0,.6));}
+
+    .metrics{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+      position:relative; z-index:1;
+    }
+    .metric{padding:16px 16px;border-radius:22px;border:1px solid rgba(255,255,255,.08);background: rgba(0,0,0,.16);min-height:104px;display:flex;flex-direction:column;justify-content:center;}
+    .metric .k{font-size:18px;color:var(--muted2);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+    .metric .v{font-size:30px;font-weight:800;color:var(--text)}
+    .metric .v b{color:var(--gold2)}
+
+    /* right: today + next hours */
+    .side{
+      padding:34px 34px;
+      display:grid;
+      grid-template-rows:auto auto 1fr;
+      gap:16px;
+      position:relative;
+      z-index:1;
+    }
+
+    .todayRow{
+      display:flex; align-items:center; justify-content:space-between; gap:18px;
+      padding:16px 16px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.16);
+    }
+    .todayRow .left{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .todayRow .left .t1{font-size:20px;color:var(--muted2)}
+    .todayRow .left .t2{font-size:34px;font-weight:850;color:var(--gold2)}
+    .todayRow .right{
+      text-align:right;
+      font-size:22px;color:var(--muted);
+      line-height:1.35;
+    }
+    .todayRow .right b{color:var(--text)}
+
+    .hours{display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;align-content:start;grid-auto-rows:minmax(0,1fr);}
+    .hour{
+      padding:14px 12px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.14);
+      text-align:center;
+    }
+    .hour .ht{font-size:18px;color:var(--muted2);margin-bottom:8px}
+    .hour .hv{font-size:30px;font-weight:850}
+    .hour .hi{margin-top:10px; opacity:.92}
+    .hour .hi svg{width:52px;height:52px;filter: drop-shadow(0 10px 16px rgba(0,0,0,.55));}
+
+    /* Bottom ticker bar */
+    .tickerBar{
+      height:110px;
+      width:100%;
+      padding:10px 0 0 0;
+      margin:0;                 /* align with main layout width */
+      border-top:1px solid rgba(215,184,90,.22);
+      background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.35));
+      position:relative;
+      overflow:hidden;
+    }
+    .tickerInner{
+      height:100%;
+      padding:10px 20px 14px 20px;
+    }
+    .tickerLabel{
+      position:absolute;
+      left:26px; top:10px;
+      font-size:14px;
+      letter-spacing:.25px;
+      color:rgba(242,242,242,.55);
+      pointer-events:none;
+    }
+
+    /* make TradingView transparent */
+    .tradingview-widget-container,
+    .tradingview-widget-container__widget{
+      height:100% !important;
+      width:100% !important;
+    }
+    .tradingview-widget-container{width:100% !important;}
+ 
+/* Fullscreen background video */
+    .bg{
+      position:fixed; inset:0;
+      overflow:hidden;
+      background:#05070d;
+    }
+    .bg video{
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      opacity:.92;          /* a képen látható “luxy” háttérhez */
+      filter: contrast(1.05) saturate(1.05);
+    }
+    .bg::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(1200px 700px at 40% 35%, rgba(0,0,0,.25), rgba(0,0,0,.55) 60%, rgba(0,0,0,.72) 100%),
+        linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.55));
+      pointer-events:none;
+    }
+
+ </style>
+</head>
+
+<body>
+  <div class="stage">
+ <div class="bg" aria-hidden="true">
+    <video autoplay="" muted="" loop="" playsinline="">
+      <source src="abstract_loop.mp4" type="video/mp4">
+    </video>
+  </div>
+
+    <div class="surface" id="surface" style="transform: translate3d(0px, 106px, 0px) scale(0.678646);">
+    <div class="shimmer"></div>
+    <div class="dust"></div>
+
+    <div class="wrap">
+      <div class="top">
+        <div class="brand">
+          <div class="city">Debrecen</div>
+          <div class="sub">
+            <span class="pill">Current weather <b id="status">• live</b></span>
+            <span id="updated" class="pill">Last update: <b>08:22</b></span>
+          </div>
+        </div>
+
+        <div class="clock">
+          <div class="time" id="clock">08:22 AM</div>
+          <div class="date" id="date">Wednesday, January 14, 2026</div>
+        </div>
+      </div>
+
+      <div class="main">
+        <!-- CURRENT -->
+        <div class="panel current">
+          <div class="headline">
+            <div class="h">Now</div>
+            <div class="tag" id="wxTag">CLOUDY</div>
+          </div>
+
+          <div class="hero">
+            <div>
+              <div class="temp"><span id="temp">-7</span>°C</div>
+              <div class="desc" id="desc">Cloudy</div>
+              <div class="feels">Feeling of heat: <b id="feels">-11</b>°C</div>
+            </div>
+
+            <div class="iconBox" id="iconBox" aria-label="időjárás ikon"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path></svg></div>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">
+              <div class="k">Wind</div>
+              <div class="v"><span id="wind">7</span> <b>km/h</b></div>
+            </div>
+            <div class="metric">
+              <div class="k">Chance of precipitation</div>
+              <div class="v"><span id="precipProb">10</span><b>%</b></div>
+            </div>
+            <div class="metric">
+              <div class="k">UV index</div>
+              <div class="v"><span id="uv">0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDE -->
+        <div class="panel side">
+          <div class="headline" style="justify-content:flex-start;">
+            <div class="h">Today</div>
+          </div>
+
+          <div class="todayRow">
+            <div class="left">
+              <div class="t1">Daily summary</div>
+              <div class="t2"><span id="tmax">0</span>° / <span id="tmin">-8</span>°</div>
+            </div>
+            <div class="right">
+              Sunrise: <b id="sunrise">07:17 AM</b><br>
+              Sunset: <b id="sunset">04:07 PM</b>
+            </div>
+          </div>
+
+          <div>
+            <div class="headline" style="margin-bottom:12px;">
+              <div class="h">Next hours</div>
+              <div class="tag">8 blocks</div>
+            </div>
+
+            <div class="hours" id="hours"><div class="hour">
+        <div class="ht">10:00 AM</div>
+        <div class="hv">-4°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path></svg></div>
+      </div><div class="hour">
+        <div class="ht">11:00 AM</div>
+        <div class="hv">-3°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path></svg></div>
+      </div><div class="hour">
+        <div class="ht">12:00 PM</div>
+        <div class="hv">-2°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path></svg></div>
+      </div><div class="hour">
+        <div class="ht">01:00 PM</div>
+        <div class="hv">-1°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 34h26a9 9 0 0 0 0-18 13 13 0 0 0-25-3A8 8 0 0 0 20 34Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path>
+    <path d="M24 44l-3 7M34 44l-3 7M44 44l-3 7" stroke="rgba(243,225,163,.95)" stroke-width="3.2" stroke-linecap="round"></path></svg></div>
+      </div><div class="hour">
+        <div class="ht">02:00 PM</div>
+        <div class="hv">-1°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 34h26a9 9 0 0 0 0-18 13 13 0 0 0-25-3A8 8 0 0 0 20 34Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path>
+    <path d="M24 44l-3 7M34 44l-3 7M44 44l-3 7" stroke="rgba(243,225,163,.95)" stroke-width="3.2" stroke-linecap="round"></path></svg></div>
+      </div><div class="hour">
+        <div class="ht">03:00 PM</div>
+        <div class="hv">-1°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path></svg></div>
+      </div><div class="hour">
+        <div class="ht">04:00 PM</div>
+        <div class="hv">-1°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path></svg></div>
+      </div><div class="hour">
+        <div class="ht">05:00 PM</div>
+        <div class="hv">-1°C</div>
+        <div class="hi"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z" stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"></path></svg></div>
+      </div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM TICKER -->
+      
+
+    </div>
+    </div>
+  </div>
+
+
+<script>
+  // Scale the 1920×1080 design surface to fill the screen.
+  // On a true 3840×2160 display, this becomes exactly 2.0, preserving the 1080p look.
+  (function(){
+    const DESIGN_W = 1920, DESIGN_H = 1080;
+    const surface = () => document.getElementById('surface');
+    function applyScale(){
+      const el = surface();
+      if(!el) return;
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const s = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+
+      // Center if aspect differs.
+      const x = (vw - DESIGN_W * s) / 2;
+      const y = (vh - DESIGN_H * s) / 2;
+
+      // Reduce subpixel blur: snap translate to whole pixels.
+      const xs = Math.round(x);
+      const ys = Math.round(y);
+
+      el.style.transform = `translate3d(${xs}px, ${ys}px, 0) scale(${s})`;
+    }
+    window.addEventListener('resize', applyScale, {passive:true});
+    window.addEventListener('orientationchange', applyScale, {passive:true});
+    document.addEventListener('DOMContentLoaded', applyScale);
+    // In case the browser fires resize late on TV players
+    setTimeout(applyScale, 250);
+  })();
+</script>
+
+<script>
+  // Debrecen koordináták
+  const LAT = 47.5316, LON = 21.6273;
+  const TZ = "Europe/Budapest";
+
+  
+
+  // Night/day helper based on today's sunrise/sunset (from Open-Meteo daily)
+  let SUNRISE = null; // Date
+  let SUNSET  = null; // Date
+  function isNight(dateObj){
+    const d = dateObj || new Date();
+    if(!SUNRISE || !SUNSET){
+      const h = d.getHours();
+      return (h < 6 || h >= 18);
+    }
+    return (d < SUNRISE || d >= SUNSET);
+  }
+// Weather icons (gold stroke)
+  function iconSun(){return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="32" cy="32" r="10" stroke="rgba(243,225,163,.95)" stroke-width="3"/>
+    <path d="M32 6v10M32 48v10M6 32h10M48 32h10M13 13l7 7M44 44l7 7M51 13l-7 7M20 44l-7 7"
+      stroke="rgba(215,184,90,.95)" stroke-width="3" stroke-linecap="round"/></svg>`;}
+  
+  function iconMoon(){return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M41 10c-10 2-17 11-15 22 2 11 13 19 24 17-6 6-16 9-25 5C12 49 6 37 9 24 12 12 24 5 36 8c2 .5 4 1.2 5 2z"
+      stroke="rgba(243,225,163,.95)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+function iconCloud(){return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 44h24a10 10 0 0 0 0-20 14 14 0 0 0-27-3A9 9 0 0 0 22 44Z"
+      stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"/></svg>`;}
+  function iconRain(){return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 34h26a9 9 0 0 0 0-18 13 13 0 0 0-25-3A8 8 0 0 0 20 34Z"
+      stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M24 44l-3 7M34 44l-3 7M44 44l-3 7"
+      stroke="rgba(243,225,163,.95)" stroke-width="3.2" stroke-linecap="round"/></svg>`;}
+  function iconSnow(){return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 32h26a9 9 0 0 0 0-18 13 13 0 0 0-25-3A8 8 0 0 0 20 32Z"
+      stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M24 42l2 2-2 2-2-2 2-2Zm10 0l2 2-2 2-2-2 2-2Zm10 0l2 2-2 2-2-2 2-2Z"
+      fill="rgba(243,225,163,.95)"/></svg>`;}
+  function iconFog(){return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 26h36M10 34h44M16 42h32"
+      stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linecap="round"/></svg>`;}
+  function iconStorm(){return `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 30h26a9 9 0 0 0 0-18 13 13 0 0 0-25-3A8 8 0 0 0 20 30Z"
+      stroke="rgba(215,184,90,.95)" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M33 33l-6 11h7l-3 12 10-16h-7l4-7Z"
+      fill="rgba(243,225,163,.95)"/></svg>`;}
+
+  function wxText(code){
+  if (code === 0) return "Clear";
+  if ([1,2,3].includes(code)) return "Cloudy";
+  if ([45,48].includes(code)) return "Fog";
+  if ([51,53,55,56,57].includes(code)) return "Drizzle";
+  if ([61,63,65,66,67].includes(code)) return "Rain";
+  if ([71,73,75,77].includes(code)) return "Snow";
+  if ([80,81,82].includes(code)) return "Rain showers";
+  if ([95,96,99].includes(code)) return "Thunderstorm";
+    return "Változó";
+  }
+  
+  function wxIcon(code, isoTime){
+    const d = isoTime ? new Date(isoTime) : new Date();
+    if (code === 0) return isNight(d) ? iconMoon() : iconSun();
+    if ([1,2,3].includes(code)) return iconCloud();
+    if ([45,48].includes(code)) return iconFog();
+    if ([51,53,55,56,57].includes(code)) return iconRain();
+    if ([61,63,65,66,67].includes(code)) return iconRain();
+    if ([71,73,75,77].includes(code)) return iconSnow();
+    if ([80,81,82].includes(code)) return iconRain();
+    if ([95,96,99].includes(code)) return iconStorm();
+    return iconCloud();
+  }
+function tickClock(){
+    const d = new Date();
+    document.getElementById("clock").textContent =
+      d.toLocaleTimeString("en-EN", { hour:"2-digit", minute:"2-digit" });
+    document.getElementById("date").textContent =
+      d.toLocaleDateString("en-EN", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+  }
+
+  function fmtTime(iso){
+    const d = new Date(iso);
+    return d.toLocaleTimeString("en-EN", { hour:"2-digit", minute:"2-digit" });
+  }
+
+  async function loadWeather(){
+    const status = document.getElementById("status");
+    status.textContent = "• update…";
+
+    const url =
+      `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+      `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m` +
+      `&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max` +
+      `&hourly=temperature_2m,weather_code` +
+      `&timezone=${encodeURIComponent(TZ)}`;
+
+    const r = await fetch(url, { cache: "no-store" });
+    const j = await r.json();
+
+    const c = j.current;
+    document.getElementById("temp").textContent = Math.round(c.temperature_2m);
+    document.getElementById("feels").textContent = Math.round(c.apparent_temperature);
+    document.getElementById("wind").textContent = Math.round(c.wind_speed_10m);
+
+    const desc = wxText(c.weather_code);
+    document.getElementById("desc").textContent = desc;
+    document.getElementById("wxTag").textContent = desc.toUpperCase();
+    document.getElementById("iconBox").innerHTML = wxIcon(c.weather_code);
+
+    const d0 = 0;
+    document.getElementById("tmax").textContent = Math.round(j.daily.temperature_2m_max[d0]);
+    document.getElementById("tmin").textContent = Math.round(j.daily.temperature_2m_min[d0]);
+    document.getElementById("uv").textContent = j.daily.uv_index_max ? Math.round(j.daily.uv_index_max[d0]) : "—";
+    document.getElementById("precipProb").textContent =
+      j.daily.precipitation_probability_max ? Math.round(j.daily.precipitation_probability_max[d0]) : "—";
+    document.getElementById("sunrise").textContent = fmtTime(j.daily.sunrise[d0]);
+    document.getElementById("sunset").textContent  = fmtTime(j.daily.sunset[d0]);
+
+    
+    // store sunrise/sunset for night icon switching
+    SUNRISE = new Date(j.daily.sunrise[d0]);
+    SUNSET  = new Date(j.daily.sunset[d0]);
+// next hours: next 8 hours (hour-by-hour)
+    const hoursEl = document.getElementById("hours");
+    hoursEl.innerHTML = "";
+
+    const times = j.hourly.time;
+    const temps = j.hourly.temperature_2m;
+    const codes = j.hourly.weather_code;
+
+    const now = new Date();
+    let idx = times.findIndex(t => new Date(t) >= now);
+    if (idx < 0) idx = 0;
+
+    const picks = Array.from({length: 8}, (_,k)=> idx + 1 + k).filter(i => i < times.length);
+
+    for (const i of picks){
+      const card = document.createElement("div");
+      card.className = "hour";
+      card.innerHTML = `
+        <div class="ht">${fmtTime(times[i])}</div>
+        <div class="hv">${Math.round(temps[i])}°C</div>
+        <div class="hi">${wxIcon(codes[i], times[i])}</div>
+      `;
+      hoursEl.appendChild(card);
+    }
+
+    const upd = new Date();
+    document.getElementById("updated").innerHTML =
+      `Last update: <b>${upd.toLocaleTimeString("hu-HU",{hour:"2-digit",minute:"2-digit"})}</b>`;
+    status.textContent = "• live";
+  }
+
+  tickClock();
+  setInterval(tickClock, 1000*20);
+  loadWeather();
+  setInterval(loadWeather, 1000*60*10); // 10 percenként
+</script>
+
+
+
+
+
+</body></html>
