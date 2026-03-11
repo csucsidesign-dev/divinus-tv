@@ -1,143 +1,865 @@
 <!DOCTYPE html>
-<html lang="hu">
-<head>
-  <meta charset="UTF-8" />
-  <title>Időjárás HU/EN + konstans piaci árfolyamok</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --ticker-total: 190px;
-      --bg: #000;
-      --muted: rgba(242,242,242,.55);
-      --stroke: rgba(215,184,90,.22);
-    }
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg);
-      overflow: hidden;
-      font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
-    }
+<html lang="en">
+  <head>
+    <title>Charming Athletic Mole</title>
+    <meta property="og:title" content="Charming Athletic Mole" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
+    <meta property="twitter:card" content="summary_large_image" />
 
-  /* Fullscreen background video */
-    .bg{
-      position:fixed; inset:0;
-      overflow:hidden;
-      background:#05070d;
-    }
-    .bg video{
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover;
-      opacity:.92;          /* a képen látható “luxy” háttérhez */
-      filter: contrast(1.05) saturate(1.05);
-    }
-    .bg::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(1200px 700px at 40% 35%, rgba(0,0,0,.25), rgba(0,0,0,.55) 60%, rgba(0,0,0,.72) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.20), rgba(0,0,0,.55));
-      pointer-events:none;
-    }
+    <style data-tag="reset-style-sheet">
+      html {  line-height: 1.15;}body {  margin: 0;}* {  box-sizing: border-box;  border-width: 0;  border-style: solid;  -webkit-font-smoothing: antialiased;}p,li,ul,pre,div,h1,h2,h3,h4,h5,h6,figure,blockquote,figcaption {  margin: 0;  padding: 0;}button {  background-color: transparent;}button,input,optgroup,select,textarea {  font-family: inherit;  font-size: 100%;  line-height: 1.15;  margin: 0;}button,select {  text-transform: none;}button,[type="button"],[type="reset"],[type="submit"] {  -webkit-appearance: button;  color: inherit;}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="reset"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner {  border-style: none;  padding: 0;}button:-moz-focus,[type="button"]:-moz-focus,[type="reset"]:-moz-focus,[type="submit"]:-moz-focus {  outline: 1px dotted ButtonText;}a {  color: inherit;  text-decoration: inherit;}pre {  white-space: normal;}input {  padding: 2px 4px;}img {  display: block;}details {  display: block;  margin: 0;  padding: 0;}summary::-webkit-details-marker {  display: none;}[data-thq="accordion"] [data-thq="accordion-content"] {  max-height: 0;  overflow: hidden;  transition: max-height 0.3s ease-in-out;  padding: 0;}[data-thq="accordion"] details[data-thq="accordion-trigger"][open] + [data-thq="accordion-content"] {  max-height: 1000vh;}details[data-thq="accordion-trigger"][open] summary [data-thq="accordion-icon"] {  transform: rotate(180deg);}html { scroll-behavior: smooth  }
+    </style>
+    <style data-tag="default-style-sheet">
+      html {
+        font-family: Inter;
+        font-size: 1rem;
+      }
 
+      body {
+        font-weight: 400;
+        font-style:normal;
+        text-decoration: undefined;
+        text-transform: undefined;
+        letter-spacing: 0.02em;
+        line-height: 1.6;
+        color: var(--color-on-surface);
+        background: var(--color-surface);
 
+        fill: var(--color-on-surface);
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/animate.css@4.1.1/animate.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap"
+      data-tag="font"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@teleporthq/teleport-custom-scripts/dist/style.css"
+    />
+  </head>
+  <body>
+    <link rel="stylesheet" href="./style.css" />
+    <div>
+      <link href="./index.css" rel="stylesheet" />
 
-    /* Felső rész: a váltakozó oldalak helye */
-    #viewport {
-      position: fixed;
-      left: 0; top: 0;
-      width: 100%;
-      height: calc(100vh - var(--ticker-total));
-      overflow: hidden;
-      background: var(--bg);
-    }
+      <div class="home-container1">
+        <div class="home-container2">
+          <navigation-wrapper
+            class="navigation-wrapper"
+            rootclassname="navigationundefined"
+          >
+            <!--Navigation component-->
+            <div class="navigation-container1 navigationroot-class-name">
+              <nav class="navigation-wrapper">
+                <div class="navigation-container">
+                  <a href="index.html">
+                    <div class="navigation-logo">
+                      <span class="section-title">Csucsi Design</span>
+                    </div>
+                  </a>
+                  <div class="navigation-desktop-links">
+                    <a href="index.html">
+                      <div class="navigation-link"><span>Főoldal</span></div>
+                    </a>
+                    <a href="portfolio.html">
+                      <div class="navigation-link"><span>Portfólió</span></div>
+                    </a>
+                    <a href="about-me.html">
+                      <div class="navigation-link"><span>RÓLAM</span></div>
+                    </a>
+                    <a
+                      href="mailto:csucska.gergo@gmail.com?subject=Grafikai Megkeresés"
+                    >
+                      <div
+                        class="navigation-thq-btn-elm btn-sm btn-primary btn"
+                      >
+                        <span>Kapcsolat</span>
+                      </div>
+                    </a>
+                  </div>
+                  <button
+                    id="navToggle"
+                    aria-label="Menü megnyitása"
+                    aria-expanded="false"
+                    class="navigation-mobile-toggle"
+                  >
+                    <svg
+                      fill="none"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                  </button>
+                </div>
+              </nav>
+              <div id="mobileOverlay" class="navigation-mobile-overlay">
+                <div class="navigation-overlay-header">
+                  <a href="index.html">
+                    <div class="navigation-logo">
+                      <span class="section-title">AranyVonal</span>
+                    </div>
+                  </a>
+                  <button
+                    id="navClose"
+                    aria-label="Menü bezárása"
+                    class="navigation-mobile-close"
+                  >
+                    <svg
+                      fill="none"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+                <div class="navigation-overlay-content">
+                  <div class="navigation-mobile-links">
+                    <a href="index.html">
+                      <div class="navigation-mobile-link">
+                        <span>Főoldal</span>
+                        <svg
+                          fill="none"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="24"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M5 12h14m-7-7l7 7l-7 7"></path>
+                        </svg>
+                      </div>
+                    </a>
+                    <a href="portfolio.html">
+                      <div class="navigation-mobile-link">
+                        <span>Portfólió</span>
+                        <svg
+                          fill="none"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="24"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M5 12h14m-7-7l7 7l-7 7"></path>
+                        </svg>
+                      </div>
+                    </a>
+                    <a href="about-me.html">
+                      <div class="navigation-mobile-link">
+                        <span>About Me</span>
+                        <svg
+                          fill="none"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="24"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M5 12h14m-7-7l7 7l-7 7"></path>
+                        </svg>
+                      </div>
+                    </a>
+                    <a href="#about">
+                      <div class="navigation-mobile-link">
+                        <span>Rólam</span>
+                        <svg
+                          fill="none"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="24"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M5 12h14m-7-7l7 7l-7 7"></path>
+                        </svg>
+                      </div>
+                    </a>
+                    <a href="#contact">
+                      <div class="navigation-mobile-link">
+                        <span>Kapcsolat</span>
+                        <svg
+                          fill="none"
+                          width="24"
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="24"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M5 12h14m-7-7l7 7l-7 7"></path>
+                        </svg>
+                      </div>
+                    </a>
+                  </div>
+                  <div class="navigation-overlay-footer">
+                    <p class="section-content">
+                      AranyVonal &amp;copy; 2026. Prémium Grafikai Megoldások.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="navigation-container2">
+                <div class="navigation-container3">
+                  <script defer="" data-name="navigation-logic">
+                    document.addEventListener('DOMContentLoaded', function() {
+                      (function(){
+                        const navToggle = document.getElementById("navToggle")
+                        const navClose = document.getElementById("navClose")
+                        const mobileOverlay = document.getElementById("mobileOverlay")
+                        const body = document.body
 
-    iframe.page {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: none;
-      background: var(--bg);
-    }
-    iframe.page.active { display: block; }
+                        const openMenu = () => {
+                          mobileOverlay.style.display = "flex"
+                          mobileOverlay.setAttribute("data-open", "true")
+                          navToggle.setAttribute("aria-expanded", "true")
+                          body.style.overflow = "hidden"
+                        }
 
-    /* Alsó konstans ticker */
-    #ticker {
-      position: fixed;
-      left: 0; right: 0; bottom: 0;
-      height: var(--ticker-total);
-      background: linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.35));
-      border-top: 1px solid var(--stroke);
-      overflow: hidden;
-    }
+                        const closeMenu = () => {
+                          mobileOverlay.style.display = "none"
+                          mobileOverlay.setAttribute("data-open", "false")
+                          navToggle.setAttribute("aria-expanded", "false")
+                          body.style.overflow = ""
+                        }
 
-    #tickerLabel{
-      position:absolute;
-      left:26px;
-      top:10px;
-      font-size:36px; /* ~2.5–3x */
-      letter-spacing:.6px;
-      color:var(--muted);
-      pointer-events:none;
-      z-index:2;
-    }
+                        navToggle.addEventListener("click", openMenu)
+                        navClose.addEventListener("click", closeMenu)
 
-    #tvWrap{
-      position:absolute;
-      left:0; right:0; bottom:0;
-      height:72px;
-      transform: scale(2.6);
-      transform-origin: left bottom;
-    }
-    #tvWrap iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      display: block;
-    }
-  </style>
-</head>
-<body>
- <div class="bg" aria-hidden="true">
-    <video autoplay muted loop playsinline>
-      <source src="abstract_loop.mp4" type="video/mp4">
-    </video>
-  </div>
+                        const mobileLinks = mobileOverlay.querySelectorAll(".navigation-mobile-link")
+                        mobileLinks.forEach((link) => {
+                          link.addEventListener("click", () => {
+                            closeMenu()
+                          })
+                        })
 
-  <div id="viewport">
-    <iframe id="hu" class="page active" src="magyar_02.html" title="Magyar"></iframe>
-    <iframe id="en" class="page" src="angol_02.html" title="English"></iframe>
-  </div>
+                        window.addEventListener("resize", () => {
+                          if (window.innerWidth > 767 && mobileOverlay.getAttribute("data-open") === "true") {
+                            closeMenu()
+                          }
+                        })
 
-  <div id="ticker" aria-label=" ">
-   
-    <div id="tvWrap">
-      <iframe
-        scrolling="no"
-        allowtransparency="true"
-        frameborder="0"
-        src="https://www.tradingview-widget.com/embed-widget/ticker-tape/?locale=hu#%7B%22symbols%22%3A%5B%7B%22proName%22%3A%22FOREXCOM%3AEURHUF%22%2C%22title%22%3A%22EUR%2FHUF%22%7D%2C%7B%22proName%22%3A%22FOREXCOM%3AUSDHUF%22%2C%22title%22%3A%22USD%2FHUF%22%7D%2C%7B%22proName%22%3A%22FOREXCOM%3ACHFHUF%22%2C%22title%22%3A%22CHF%2FHUF%22%7D%2C%7B%22proName%22%3A%22FX_IDC%3APLNHUF%22%2C%22title%22%3A%22PLN%2FHUF%22%7D%2C%7B%22proName%22%3A%22FX_IDC%3AJPYHUF%22%2C%22title%22%3A%22JPY%2FHUF%22%7D%2C%7B%22proName%22%3A%22BET%3AOTP%22%2C%22title%22%3A%22OTP%22%7D%2C%7B%22proName%22%3A%22BET%3AMOL%22%2C%22title%22%3A%22MOL%22%7D%2C%7B%22proName%22%3A%22BET%3ARICHTER%22%2C%22title%22%3A%22RICHTER%22%7D%2C%7B%22proName%22%3A%22BINANCE%3ABTCUSDT%22%2C%22title%22%3A%22BTC%22%7D%5D%2C%22showSymbolLogo%22%3Atrue%2C%22isTransparent%22%3Atrue%2C%22displayMode%22%3A%22adaptive%22%2C%22colorTheme%22%3A%22dark%22%2C%22width%22%3A%22100%25%22%2C%22height%22%3A44%2C%22utm_source%22%3A%22%22%2C%22utm_medium%22%3A%22widget%22%2C%22utm_campaign%22%3A%22ticker-tape%22%2C%22page-uri%22%3A%22__NHTTP__%22%7D"
-        title="TradingView ticker tape"
-      ></iframe>
+                        document.addEventListener("keydown", (e) => {
+                          if (e.key === "Escape" && mobileOverlay.getAttribute("data-open") === "true") {
+                            closeMenu()
+                          }
+                        })
+                      })()
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+          </navigation-wrapper>
+          <section class="hero-section">
+            <video
+              src="https://videos.pexels.com/video-files/19435650/19435650-hd_1280_720_30fps.mp4"
+              loop="true"
+              muted="true"
+              poster="https://images.pexels.com/videos/19435650/pictures/preview-0.jpeg"
+              autoplay="true"
+              playsinline="true"
+              class="hero-video"
+            ></video>
+            <div class="home-thq-hero-overlay-elm home-hero-overlay"></div>
+            <div class="home-hero-content-wrapper">
+              <div class="hero-inner">
+                <h1 class="home-hero-title hero-title">
+                  <span>Kreatív látásmód,</span>
+                  <br />
+                  <span>prémium megoldások</span>
+                </h1>
+                <p class="home-hero-subtitle hero-subtitle">
+                  Grafikai tervezés és vizuális stratégia a luxus, a vendéglátás
+                  és a modern márkák világában.
+                </p>
+                <div class="hero-actions">
+                  <a href="#portfolio">
+                    <div class="btn-primary btn-lg btn">
+                      <span>Projektjeim megtekintése</span>
+                    </div>
+                  </a>
+                  <a href="#contact">
+                    <div class="btn-lg btn-outline btn">
+                      <span class="home-text4">Kapcsolatfelvétel</span>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <section class="expertise-section">
+          <div class="container">
+            <div class="section-header">
+              <h2 class="section-title home-section-title">
+                Szakértelem és Kreativitás
+              </h2>
+              <p class="section-subtitle home-section-subtitle">
+                Átfogó vizuális megoldások, amelyek kiemelik márkáját a
+                tömegből.
+              </p>
+            </div>
+            <div class="expertise-grid">
+              <div class="expertise-card">
+                <div class="expertise-icon">
+                  <svg
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24"
+                    viewBox="0 0 24 24"
+                  >
+                    <g
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="m11 10l3 3m-7.5 8A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z"
+                      ></path>
+                      <path
+                        d="M9.969 17.031L21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031"
+                      ></path>
+                    </g>
+                  </svg>
+                </div>
+                <h3 class="card-heading">Branding &amp; Arculattervezés</h3>
+                <p class="section-content home-section-content">
+                  Egyedi vizuális identitások létrehozása, amelyek tükrözik a
+                  márka alapértékeit és eleganciáját.
+                </p>
+              </div>
+              <div class="expertise-card">
+                <div class="expertise-icon">
+                  <svg
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24"
+                    viewBox="0 0 24 24"
+                  >
+                    <g
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M12 10h.01M12 14h.01M12 6h.01M16 10h.01M16 14h.01M16 6h.01M8 10h.01M8 14h.01M8 6h.01M9 22v-3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"
+                      ></path>
+                      <rect x="4" y="2" rx="2" width="16" height="20"></rect>
+                    </g>
+                  </svg>
+                </div>
+                <h3 class="card-heading">Hotel &amp; Hospitality Marketing</h3>
+                <p class="section-content home-section-content">
+                  Prémium szállodai kiadványok, étlapok és marketing anyagok
+                  tervezése a luxus színvonalán.
+                </p>
+              </div>
+              <div class="expertise-card">
+                <div class="expertise-icon">
+                  <svg
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24"
+                    viewBox="0 0 24 24"
+                  >
+                    <g
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+                      ></path>
+                      <path
+                        d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+                      ></path>
+                      <path
+                        d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+                      ></path>
+                    </g>
+                  </svg>
+                </div>
+                <h3 class="card-heading">Print &amp; Digitális Design</h3>
+                <p class="section-content home-section-content">
+                  Magas minőségű nyomdai előkészítés és modern digitális
+                  kreatívok minden felületre.
+                </p>
+              </div>
+              <div class="expertise-card">
+                <div class="expertise-icon">
+                  <svg
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24"
+                    viewBox="0 0 24 24"
+                  >
+                    <g
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594zM20 2v4m2-2h-4"
+                      ></path>
+                      <circle r="2" cx="4" cy="20"></circle>
+                    </g>
+                  </svg>
+                </div>
+                <h3 class="card-heading">AI-Vizuális Koncepciók</h3>
+                <p class="section-content home-section-content">
+                  A legújabb technológiák alkalmazása futurisztikus és újszerű
+                  látványvilágok megalkotásához.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="portfolio" class="portfolio-section">
+          <div class="portfolio-intro">
+            <div class="container">
+              <h2 class="section-title home-section-title">Kiemelt Munkák</h2>
+            </div>
+          </div>
+          <div class="portfolio-grid">
+            <div class="portfolio-item large">
+              <img
+                alt="Luxus Brand Projekt"
+                src="https://images.pexels.com/photos/4110340/pexels-photo-4110340.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1500"
+                class="portfolio-img"
+              />
+              <div class="portfolio-content">
+                <span class="portfolio-category">Luxus Branding</span>
+                <h3 class="portfolio-name">Elegance Fragrance Identity</h3>
+              </div>
+            </div>
+            <div class="portfolio-item">
+              <img
+                alt="Print Design Projekt"
+                src="https://images.pexels.com/photos/10897656/pexels-photo-10897656.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1500"
+                class="portfolio-img"
+              />
+              <div class="portfolio-content">
+                <span class="portfolio-category">Print Design</span>
+                <h3 class="portfolio-name">Minimalist Stationery Set</h3>
+              </div>
+            </div>
+            <div class="portfolio-item">
+              <img
+                alt="Hotel Marketing Projekt"
+                src="https://images.pexels.com/photos/6467621/pexels-photo-6467621.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1500"
+                class="portfolio-img"
+              />
+              <div class="portfolio-content">
+                <span class="portfolio-category">Hotel Marketing</span>
+                <h3 class="portfolio-name">Royal Suite Campaign</h3>
+              </div>
+            </div>
+            <div class="portfolio-item tall">
+              <img
+                alt="AI Koncepció"
+                src="https://images.pexels.com/photos/3847491/pexels-photo-3847491.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1500"
+                class="portfolio-img"
+              />
+              <div class="portfolio-content">
+                <span class="portfolio-category">AI Concept</span>
+                <h3 class="portfolio-name">Marble Textures Evolution</h3>
+              </div>
+            </div>
+          </div>
+          <div class="portfolio-footer">
+            <a href="portfolio.html">
+              <div class="home-thq-portfolio-cta-link-elm">
+                <div class="portfolio-cta-button">
+                  <span class="home-thq-portfolio-cta-text-elm">
+                    Összes munka megtekintése
+                  </span>
+                  <div class="home-thq-portfolio-cta-icon-wrapper-elm">
+                    <svg
+                      fill="none"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M5 12h14m-6 6l6-6m-6-6l6 6"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </section>
+        <section class="about-section">
+          <div class="about-flex container">
+            <div class="about-image-container">
+              <img
+                alt="A stúdió"
+                src="https://images.pexels.com/photos/6483628/pexels-photo-6483628.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=1500"
+                class="about-img"
+              />
+              <div class="about-accent-box"></div>
+            </div>
+            <div class="about-text">
+              <span class="section-subtitle home-section-subtitle">Rólam</span>
+              <h2 class="section-title home-section-title">
+                A vizuális történetmesélés művészete
+              </h2>
+              <p class="section-content home-section-content">
+                Több mint egy évtizedes tapasztalattal rendelkező grafikus
+                tervezőként célom, hogy ügyfeleim számára ne csupán designt,
+                hanem maradandó értéket és prémium élményt teremtsek.
+                Specialitásom a letisztult, elegáns formavilág, amely a luxus és
+                a funkcionalitás metszéspontjában születik újjá.
+              </p>
+              <p class="section-content home-section-content">
+                Hiszek abban, hogy minden projekt egyedi megközelítést igényel,
+                legyen szó egy boutique hotel teljes arculatáról vagy egy modern
+                digitális kampányról.
+              </p>
+              <div class="about-stats">
+                <div class="stat-item">
+                  <span class="stat-number">10+</span>
+                  <span class="stat-label">Év tapasztalat</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-number">150+</span>
+                  <span class="stat-label">Sikeres projekt</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="contact" class="home-cta-section">
+          <div class="container">
+            <div class="cta-inner">
+              <h2 class="section-title home-section-title">
+                Készen áll a következő szintre?
+              </h2>
+              <p class="section-content home-section-content">
+                Vágjunk bele közösen a tervezésbe, és alkossunk valami igazán
+                különlegeset.
+              </p>
+              <a href="mailto:hello@designer.hu?subject=">
+                <div class="btn-accent btn-xl btn">
+                  <span>Konzultáció kérése</span>
+                </div>
+              </a>
+            </div>
+          </div>
+          <footer-wrapper
+            class="footer-wrapper"
+            rootclassname="footerundefined"
+          >
+            <!--Footer component-->
+            <div class="footer-container1 footerroot-class-name">
+              <footer class="footer-root">
+                <div class="footer-container">
+                  <div class="footer-top">
+                    <div class="footer-brand">
+                      <span class="footer-logo">Csucsi Design</span>
+                      <p class="footer-tagline">
+                        Premium Creative Solutions &amp; Visual Storytelling
+                      </p>
+                    </div>
+                    <nav aria-label="Footer Navigation" class="footer-nav">
+                      <a href="about-me.html">
+                        <div class="footer-link"><span>Rólam</span></div>
+                      </a>
+                      <a href="portfolio.html">
+                        <div class="footer-thq-footer-link-elm2 footer-link">
+                          <span>Portfólió</span>
+                        </div>
+                      </a>
+                      <a href="mailto:csucska.gergo@gmail.com?subject=">
+                        <div class="footer-thq-footer-link-elm3 footer-link">
+                          <span>kapcsolat</span>
+                        </div>
+                      </a>
+                    </nav>
+                    <div class="footer-socials">
+                      <a href="#">
+                        <div aria-label="Behance" class="footer-social-icon">
+                          <svg
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="24"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="M3 18V6h4.5a3 3 0 0 1 0 6a3 3 0 0 1 0 6zm0-6h4.5m6.5 1h7a3.5 3.5 0 0 0-7 0v2a3.5 3.5 0 0 0 6.64 1M16 6h3"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            ></path>
+                          </svg>
+                        </div>
+                      </a>
+                      <a href="#">
+                        <div aria-label="Instagram" class="footer-social-icon">
+                          <svg
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="24"
+                            viewBox="0 0 24 24"
+                          >
+                            <g
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <rect
+                                x="2"
+                                y="2"
+                                rx="5"
+                                ry="5"
+                                width="20"
+                                height="20"
+                              ></rect>
+                              <path
+                                d="M16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37m1.5-4.87h.01"
+                              ></path>
+                            </g>
+                          </svg>
+                        </div>
+                      </a>
+                      <a href="#">
+                        <div aria-label="LinkedIn" class="footer-social-icon">
+                          <svg
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="24"
+                            viewBox="0 0 24 24"
+                          >
+                            <g
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path
+                                d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2a2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6M2 9h4v12H2z"
+                              ></path>
+                              <circle r="2" cx="4" cy="4"></circle>
+                            </g>
+                          </svg>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div class="footer-divider"></div>
+                  <div class="footer-bottom">
+                    <div class="footer-legal">
+                      <span class="footer-copy">
+                        &amp;copy; 2026 Csucsi Design. All rights reserved.
+                      </span>
+                      <div class="footer-legal-links">
+                        <a href="#">
+                          <div class="footer-legal-link">
+                            <span>Privacy Policy</span>
+                          </div>
+                        </a>
+                        <a href="#">
+                          <div class="footer-legal-link">
+                            <span>Terms of Service</span>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                    <button
+                      id="scrollToTop"
+                      aria-label="Back to top"
+                      class="footer-back-to-top"
+                    >
+                      <span class="footer-btn-text">Top</span>
+                      <svg
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="24"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="m5 12l7-7l7 7m-7 7V5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </footer>
+              <div class="footer-container2">
+                <div class="footer-container3">
+                  <script defer="" data-name="footer-logic">
+                    document.addEventListener('DOMContentLoaded', function() {
+                      (function(){
+                        const scrollBtn = document.getElementById("scrollToTop")
+
+                        if (scrollBtn) {
+                          scrollBtn.addEventListener("click", () => {
+                            window.scrollTo({
+                              top: 0,
+                              behavior: "smooth",
+                            })
+                          })
+
+                          window.addEventListener("scroll", () => {
+                            if (window.scrollY > 500) {
+                              scrollBtn.style.opacity = "1"
+                              scrollBtn.style.visibility = "visible"
+                            } else {
+                              scrollBtn.style.opacity = "0.8"
+                            }
+                          })
+                        }
+                      })()
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+          </footer-wrapper>
+        </section>
+        <div class="home-container3">
+          <div class="home-container4">
+            <script defer="" data-name="homepage-animations">
+              document.addEventListener('DOMContentLoaded', function() {
+                (function(){
+                  // Scroll Reveal Animation Enhancement
+                  const revealElements = document.querySelectorAll(".expertise-card, .portfolio-item, .about-text, .about-image-container")
+
+                  const revealOnScroll = () => {
+                    const triggerBottom = window.innerHeight * 0.85
+
+                    revealElements.forEach((el) => {
+                      const elTop = el.getBoundingClientRect().top
+
+                      if (elTop < triggerBottom) {
+                        el.style.opacity = "1"
+                        el.style.transform = "translateY(0)"
+                      }
+                    })
+                  }
+
+                  // Initial setup for reveal animation
+                  revealElements.forEach((el) => {
+                    el.style.opacity = "0"
+                    el.style.transform = "translateY(30px)"
+                    el.style.transition = "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+                  })
+
+                  window.addEventListener("scroll", revealOnScroll)
+                  revealOnScroll() // Trigger once on load
+
+                  // Hero parallax effect
+                  const heroVideo = document.querySelector(".hero-video")
+                  if (heroVideo) {
+                    window.addEventListener("scroll", () => {
+                      const scrollValue = window.scrollY
+                      heroVideo.style.transform = `translateY(${scrollValue * 0.3}px)`
+                    })
+                  }
+                })()
+              });
+            </script>
+          </div>
+        </div>
+        <a href="https://play.teleporthq.io/signup">
+          <div aria-label="Sign up to TeleportHQ" class="home-container5">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 19 21"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="home-icon29"
+            >
+              <path
+                d="M9.1017 4.64355H2.17867C0.711684 4.64355 -0.477539 5.79975 -0.477539 7.22599V13.9567C-0.477539 15.3829 0.711684 16.5391 2.17867 16.5391H9.1017C10.5687 16.5391 11.7579 15.3829 11.7579 13.9567V7.22599C11.7579 5.79975 10.5687 4.64355 9.1017 4.64355Z"
+                fill="#B23ADE"
+              ></path>
+              <path
+                d="M10.9733 12.7878C14.4208 12.7878 17.2156 10.0706 17.2156 6.71886C17.2156 3.3671 14.4208 0.649963 10.9733 0.649963C7.52573 0.649963 4.73096 3.3671 4.73096 6.71886C4.73096 10.0706 7.52573 12.7878 10.9733 12.7878Z"
+                fill="#FF5C5C"
+              ></path>
+              <path
+                d="M17.7373 13.3654C19.1497 14.1588 19.1497 15.4634 17.7373 16.2493L10.0865 20.5387C8.67402 21.332 7.51855 20.6836 7.51855 19.0968V10.5141C7.51855 8.92916 8.67402 8.2807 10.0865 9.07221L17.7373 13.3654Z"
+                fill="#2874DE"
+              ></path>
+            </svg>
+            <span class="home-text6">Built in TeleportHQ</span>
+          </div>
+        </a>
+      </div>
+      <link rel="canonical" href="https://csucsidesign.teleporthq.app/" />
     </div>
-  </div>
-
-  <script>
-    const hu = document.getElementById("hu");
-    const en = document.getElementById("en");
-    let showHu = true;
-
-    setInterval(() => {
-      showHu = !showHu;
-      hu.classList.toggle("active", showHu);
-      en.classList.toggle("active", !showHu);
-    }, 10000);
-  </script>
-
-</body>
+  </body>
 </html>

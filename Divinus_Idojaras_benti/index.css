@@ -1,0 +1,133 @@
+.navigation-wrapper {
+  display: contents;
+}
+ 
+.navigation-container1 {
+  display: contents;
+}
+ 
+.navigation-thq-btn-elm {
+  text-decoration: none;
+}
+ 
+.navigation-container2 {
+  display: none;
+}
+ 
+.navigation-container3 {
+  display: contents;
+}
+ 
+
+
+.footer-wrapper {
+  display: contents;
+}
+ 
+.footer-container1 {
+  display: contents;
+}
+ 
+.footer-thq-footer-link-elm2 {
+  text-decoration: none;
+}
+ 
+.footer-thq-footer-link-elm3 {
+  text-decoration: none;
+}
+ 
+.footer-container2 {
+  display: none;
+}
+ 
+.footer-container3 {
+  display: contents;
+}
+ 
+
+
+.home-container1 {
+  width: 100%;
+  display: block;
+  min-height: 100vh;
+}
+ 
+.home-container2 {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+ 
+.home-thq-hero-overlay-elm {
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+}
+ 
+.home-text4 {
+  color: var(--color-on-surface);
+}
+ 
+.home-thq-portfolio-cta-link-elm {
+  display: inline-block;
+  text-decoration: none;
+}
+ 
+.home-thq-portfolio-cta-text-elm {
+  color: var(--color-on-surface);
+  z-index: 2;
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--letter-spacing-heading);
+  text-transform: uppercase;
+}
+ 
+.home-thq-portfolio-cta-icon-wrapper-elm {
+  color: var(--color-secondary);
+  display: flex;
+  z-index: 2;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  align-items: center;
+  justify-content: center;
+}
+ 
+.home-container3 {
+  display: none;
+}
+ 
+.home-container4 {
+  display: contents;
+}
+ 
+.home-container5 {
+  right: 50px;
+  border: 1px solid #ffffff5c;
+  bottom: 30px;
+  display: flex;
+  z-index: 22;
+  position: fixed;
+  box-shadow: 5px 5px 10px 0px rgba(31, 31, 31, 0.4);
+  min-height: auto;
+  align-items: center;
+  padding-top: 8px;
+  padding-left: 12px;
+  border-radius: 8px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  backdrop-filter: blur(6px);
+  background-color: rgba(41, 41, 41, 0.41);
+}
+ 
+.home-icon29 {
+  width: 24px;
+  margin-right: 4px;
+}
+ 
+.home-text6 {
+  color: white;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+}
